@@ -1,0 +1,26 @@
+# Render Blueprint: one web service. The agent worker runs inside it (one process, so keep a single uvicorn worker).
+# Create a Postgres database in the Render dashboard first, then paste its *Internal Database URL* into DATABASE_URL.
+services:
+  - type: web
+    name: agent-backend
+    runtime: python
+    plan: starter            # paid plan on purpose: free web services sleep after 15 min idle and would stop the agent
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: APP_TOKEN
+        generateValue: true   # copy this value into the mobile app (Settings screen)
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: KAGGLE_USERNAME
+        sync: false
+      - key: KAGGLE_API_TOKEN
+        sync: false
+      - key: HF_TOKEN
+        sync: false
